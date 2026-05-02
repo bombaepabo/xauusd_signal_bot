@@ -1,0 +1,19 @@
+# Ignore the massive internal git history (1.15 GB)
+.git/
+
+# Ignore your local virtual environment
+.venv/
+venv/
+
+# Ignore Python cache and bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local secrets and environment variables
+.env
+
+# Ignore OS-specific metadata
+.DS_Store
+Thumbs.db
