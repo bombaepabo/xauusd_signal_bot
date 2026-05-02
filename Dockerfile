@@ -1,45 +1,30 @@
-# ── Stage 1: Build dependencies with uv ──────────────────────────────────────
-FROM python:3.11-slim AS builder
+# Use the specific version you requested
+FROM python:3.11-slim
 
 # Install uv binary directly from the official image
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# Set the working directory
 WORKDIR /app
 
-# Enable bytecode compilation for slightly faster startup
-ENV UV_COMPILE_BYTECODE=1
+# Copy dependency files first to leverage Docker's layer caching
+# This includes pyproject.toml, uv.lock, and requirements.txt if they exist
+COPY pyproject.toml* uv.lock* requirements.txt* ./
 
-# Copy ONLY dependency files to leverage Docker's layer caching
-COPY pyproject.toml uv.lock ./
+# Install dependencies into the system site-packages
+# This ensures numpy and other libs are globally accessible to the container
+RUN if [ -f requirements.txt ]; then \
+        uv pip install --system -r requirements.txt; \
+    elif [ -f pyproject.toml ]; then \
+        uv pip install --system .; \
+    fi
 
-# Install dependencies into a virtual environment
-# We use --frozen to ensure the container matches your uv.lock exactly
-RUN uv sync --frozen --no-dev --no-install-project
-
-# ── Stage 2: Lean runtime image ───────────────────────────────────────────────
-FROM python:3.11-slim AS runtime
-
-WORKDIR /app
-
-# Copy the virtual environment from the builder stage
-COPY --from=builder /app/.venv /app/.venv
-
-# Add the virtual environment to the PATH so 'python' points to the right place
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Copy ONLY the files this specific bot needs
-COPY webhook_runner.py .
-COPY signal_engine.py  .
-COPY discord_sender.py .
-COPY config.py         .
+# Copy the rest of your trading bot code
+COPY . .
 
 # Run as non-root for security
-RUN useradd -m -u 1000 botuser
+RUN useradd -m -u 1000 botuser && chown -R botuser /app
 USER botuser
 
-# Health check - verifies the SignalEngine class can be imported[cite: 1]
-HEALTHCHECK --interval=60s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "from signal_engine import SignalEngine; print('healthy')"
-
-# Start the bot[cite: 1]
+# Start the bot
 CMD ["python", "webhook_runner.py"]
