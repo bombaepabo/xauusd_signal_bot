@@ -16,7 +16,7 @@ LOT_SIZE              = float(os.getenv("LOT_SIZE", "0.01"))
 ATR_PERIOD            = int(os.getenv("ATR_PERIOD", "14"))
 TREND_THRESHOLD       = float(os.getenv("TREND_THRESHOLD", "65.0"))
 ADX_MIN               = float(os.getenv("ADX_MIN", "40.0"))   # updated: ADX 60 sweet spot
-ADX_MAX               = float(os.getenv("ADX_MAX", "60.0"))   # updated: tighter window
+ADX_MAX               = float(os.getenv("ADX_MAX", "65.0"))   # updated: tighter window
 SCAN_INTERVAL_SECONDS = int(os.getenv("SCAN_INTERVAL_SECONDS", "300"))
 
 # Support & Resistance
