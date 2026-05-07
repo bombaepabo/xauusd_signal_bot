@@ -135,6 +135,40 @@ def build_embed(signal: dict) -> discord.Embed:
         inline=False
     )
 
+
+    # ── Support & Resistance section (NEW) ───────────────────────────────────
+    sr_zone    = signal.get("sr_zone", "IN_RANGE")
+    sr_advice  = signal.get("sr_zone_advice", "")
+    sr_ctx     = signal.get("sr_context", "")
+    wall_warn  = signal.get("wall_warning", False)
+    wall_lvl   = signal.get("wall_level", None)
+    wall_str   = signal.get("wall_strength", "")
+    tp_adj     = signal.get("tp_adjusted", False)
+    ns         = signal.get("nearest_support", None)
+    nr         = signal.get("nearest_resistance", None)
+
+    def _sr_bar(strength):
+        bars = {"Very Strong": "████", "Strong": "███░",
+                "Moderate": "██░░", "Weak": "█░░░"}
+        return bars.get(strength, "░░░░")
+
+    sr_lines = []
+    if ns:
+        sr_lines.append(f"🟢 Support : `{ns['price']:.2f}` {_sr_bar(ns['strength'])} {ns['strength']} ({ns['touches']} touches)")
+    if nr:
+        sr_lines.append(f"🔴 Resist  : `{nr['price']:.2f}` {_sr_bar(nr['strength'])} {nr['strength']} ({nr['touches']} touches)")
+    sr_lines.append(f"📍 Zone    : `{sr_zone}` — {sr_advice}")
+    if tp_adj:
+        sr_lines.append("📌 *TPs snapped to S&R levels*")
+    if wall_warn and wall_lvl:
+        sr_lines.append(f"⚠️ **Wall at {wall_lvl:.2f}** ({wall_str}) between entry and TP1 — watch carefully")
+
+    embed.add_field(
+        name="🏗️ Support & Resistance",
+        value="\n".join(sr_lines) if sr_lines else "No major levels detected",
+        inline=False
+    )
+
     # ── Per-trade TP/SL ────────────────────────────────────────────────────
     for i, t in enumerate(signal["trades"]):
         be_note = f"\n↳ BE after TP{i} hits" if i > 0 else ""

@@ -13,8 +13,21 @@ import logging
 from datetime import datetime, timezone
 
 from config import (
-    DISCORD_WEBHOOK_URL, ATR_PERIOD, TP_COUNT, SL_STYLE,
-    SCAN_INTERVAL_SECONDS, TREND_THRESHOLD, LOT_SIZE
+    DISCORD_WEBHOOK_URL,
+    ATR_PERIOD,
+    TP_COUNT,
+    SL_STYLE,
+    SCAN_INTERVAL_SECONDS,
+    TREND_THRESHOLD,
+    LOT_SIZE,
+
+    ADX_MIN,
+    ADX_MAX,
+
+    USE_SR,
+    SR_SWING_WINDOW,
+    SR_SNAP_TPS,
+    SR_FILTER_WALLS,
 )
 from signal_engine import SignalEngine
 from discord_sender import send_webhook_signal
@@ -33,12 +46,20 @@ def main():
         return
 
     engine = SignalEngine(
-        atr_period=ATR_PERIOD,
-        tp_count=TP_COUNT,
-        sl_style=SL_STYLE,
-        lot_size=LOT_SIZE,
-        trend_threshold=TREND_THRESHOLD
-    )
+    atr_period=ATR_PERIOD,
+    tp_count=TP_COUNT,
+    sl_style=SL_STYLE,
+    lot_size=LOT_SIZE,
+    trend_threshold=TREND_THRESHOLD,
+
+    adx_min=ADX_MIN,
+    adx_max=ADX_MAX,
+
+    use_sr=USE_SR,
+    sr_swing_window=SR_SWING_WINDOW,
+    sr_snap_tps=SR_SNAP_TPS,
+    sr_filter_walls=SR_FILTER_WALLS,
+)
 
     last_dir = None
     last_time = None
